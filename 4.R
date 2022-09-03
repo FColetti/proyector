@@ -36,8 +36,8 @@ health <- health[filter == FALSE, ]
 health$hypertension[health$hypertension == 0] <- "No"
 health$hypertension[health$hypertension == 1] <- "Yes"
 
-health$avg_glucose_level[health$avg_glucose_level < 127] <- "Normal"
-health$avg_glucose_level[health$avg_glucose_level >= 127] <- "Diabetes"
+health$avg_glucose_status[health$avg_glucose_level < 127] <- "Normal"
+health$avg_glucose_status[health$avg_glucose_level >= 127] <- "Diabetes"
 
 health$age_group <- cut(health$age, breaks = seq(30, 110, 10))
 health$bmi_group <- cut(as.numeric(health$bmi), breaks = seq(15, 60, 5.5))
@@ -75,8 +75,6 @@ ggplot(strokes_by_gender, aes(x = gender, y = target)) +
     geom_bar(stat = "identity", fill = "blue") +
     labs(title = "Infartos por genero", x = "Genero", y = "Infartos")
 
-
-rlang::last_error()
 
 # strokes_by_gender <- health %>%
 #     filter(health$hypertension == 1) %>%
