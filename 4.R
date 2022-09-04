@@ -47,8 +47,8 @@ health$smoking_status[health$smoking_status == "formerly smoked"] <- 1
 health$smoking_status[health$smoking_status == "never smoked"] <- 0
 health$smoking_status[health$smoking_status == "smokes"] <- 1
 
-
-health$age_group <- cut(health$age, breaks = seq(30, 110, 10))
+# agrupar valores
+health$age_group <- cut(health$age, breaks = seq(20, 110, 10))
 health$bmi_group <- cut(as.numeric(health$bmi), breaks = seq(15, 60, 5.5))
 
 strokes_by_hypetension <- health %>%
@@ -115,6 +115,13 @@ ggplot(strokes_by_gender, aes(x = gender, y = target)) +
     geom_bar(stat = "identity", fill = "blue") +
     labs(title = "Infartos por genero", x = "Genero", y = "Infartos")
 
+ggplot(disease_by_smoke, aes(x = smoking_status, y = target)) +
+    geom_bar(stat = "identity", fill = "blue") +
+    labs(title = "Enfermedades por fumar", x = "Fumar", y = "Enfermedades")
+
+ggplot(disease_by_age, aes(x = age_group, y = target)) +
+    geom_bar(stat = "identity", fill = "blue") +
+    labs(title = "Enfermedades por edad", x = "Edad", y = "Enfermedades")
 
 # strokes_by_gender <- health %>%
 #     filter(health$hypertension == 1) %>%
