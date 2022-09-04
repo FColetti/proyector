@@ -146,10 +146,6 @@ ggplot(disease_by_age, aes(x = age_group, y = target)) +
     geom_bar(stat = "identity", fill = "blue") +
     labs(title = "Enfermedades por edad", x = "Edad", y = "Enfermedades")
 
-
-
-
-
 ggplot(strokes_by_age, aes(x = age_group, y = target)) +
     geom_bar(stat = "identity", fill = "blue") +
     labs(title = "Strokes by Age", x = "Age", y = "Strokes")
