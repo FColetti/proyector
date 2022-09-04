@@ -31,15 +31,15 @@ any(is.na(health))
 filter <- health$bmi == "N/A"
 health <- health[filter == FALSE, ]
 
-
-
 # filtra los valores de la columna fumadores con el valor Unknown
 filter <- health$smoking_status == "Unknown"
 health <- health[filter == FALSE, ]
 
+# renombrar hypertension
 health$hypertension[health$hypertension == 0] <- "No"
 health$hypertension[health$hypertension == 1] <- "Yes"
 
+# Generar columna para definir diabetes
 health$avg_glucose_status[health$avg_glucose_level < 127] <- "Normal"
 health$avg_glucose_status[health$avg_glucose_level >= 127] <- "Diabetes"
 
@@ -58,44 +58,46 @@ health$bmi_status[health$bmi > 39.9] <- "Obesidad tipo 3"
 
 # agrupar valores
 health$age_group <- cut(health$age, breaks = seq(20, 110, 10))
-health$bmi_group <- cut(as.numeric(health$bmi), breaks = seq(15, 60, 5.5))
 
+# Infartos x Hipertensión
 strokes_by_hypetension <- health %>%
     select(hypertension, stroke) %>%
     group_by(hypertension) %>%
     summarise(target = sum(stroke == 1))
 
+# Infartos x Edad
 strokes_by_age <- health %>%
     group_by(age_group) %>%
     summarise(target = sum(stroke == 1))
 
+# Infartos x IMC
 strokes_by_bmi <- health %>%
-    group_by(bmi_group) %>%
-    summarise(target = sum(stroke == 1))
-
-strokes_by_glucose <- health %>%
-    select(avg_glucose_level, stroke) %>%
+    select(bmi_status, stroke) %>%
     filter(stroke == 1) %>%
-    group_by(avg_glucose_level) %>%
+    group_by(bmi_status) %>%
     summarise(target = sum(stroke == 1))
 
-# strokes by gender
+# Infartos x diabetes
+strokes_by_glucose <- health %>%
+    select(avg_glucose_status, stroke) %>%
+    filter(stroke == 1) %>%
+    group_by(avg_glucose_status) %>%
+    summarise(target = sum(stroke == 1))
+
+# Infartos x genero
 strokes_by_gender <- health %>%
     select(gender, stroke) %>%
     filter(stroke == 1) %>%
     group_by(gender) %>%
     summarise(target = sum(stroke == 1))
 
-
-
-# hipertension x infarto
+# Infartos x hipertensión
 strokes_by_hypetension <- health %>%
     select(hypertension, stroke) %>%
     group_by(hypertension) %>%
     summarise(target = sum(stroke == 1))
 
-
-# infartos x fumar
+# Infartos x fumadores
 strokes_by_smoke <- health %>%
     select(smoking_status, stroke) %>%
     filter(stroke == 1) %>%
@@ -119,24 +121,48 @@ disease_by_bmi <- health %>%
     arrange(bmi_status) %>%
     summarise(target = sum(heart_disease == 1))
 
+# enfermedades x hipertensión
+disease_by_hypetension <- health %>%
+    select(hypertension, heart_disease) %>%
+    group_by(hypertension) %>%
+    summarise(target = sum(heart_disease == 1))
+
+# enfermedades x diabetes
+disease_by_glucose <- health %>%
+    select(avg_glucose_status, heart_disease) %>%
+    group_by(avg_glucose_status) %>%
+    summarise(target = sum(heart_disease == 1))
+
 typeof(disease_by_bmi)
 
+bmi_listtt <- disease_by_bmi[seq_len(disease_by_bmi):1, ]
 
-bmi_listtt <- disease_by_bmi[nrow(disease_by_bmi):1, ]
-
-# GRAFICOS
+# GRAFICOS DE INFARTOS
 
 ggplot(strokes_by_age, aes(x = age_group, y = target)) +
     geom_bar(stat = "identity", fill = "blue") +
     labs(title = "Infartos por grupo etario", x = "Edad", y = "Infartos")
 
-ggplot(strokes_by_bmi, aes(x = bmi_group, y = target)) +
+ggplot(strokes_by_bmi, aes(x = bmi_status, y = target)) +
     geom_bar(stat = "identity", fill = "blue") +
     labs(title = "Infartos por IMC", x = "IMC", y = "Infartos")
 
 ggplot(strokes_by_gender, aes(x = gender, y = target)) +
     geom_bar(stat = "identity", fill = "blue") +
     labs(title = "Infartos por genero", x = "Genero", y = "Infartos")
+
+ggplot(strokes_by_smoke, aes(x = smoking_status, y = target)) +
+    geom_bar(stat = "identity", fill = "blue") +
+    labs(title = "Strokes by smoke", x = "Age", y = "Strokes")
+
+ggplot(strokes_by_glucose, aes(x = avg_glucose_status, y = target)) +
+    geom_bar(stat = "identity", fill = "blue") +
+    labs(title = "Infartos por diabetes", x = "Diabetes", y = "Infartos")
+
+# GRAFICOS DE ENFERMEDADES DEL CORAZÓN
+ggplot(disease_by_bmi, aes(x = bmi_status, y = target)) +
+    geom_bar(stat = "identity", fill = "blue") +
+    labs(title = "bmi by disease", x = "bmi", y = "disease")
 
 ggplot(disease_by_smoke, aes(x = smoking_status, y = target)) +
     geom_bar(stat = "identity", fill = "blue") +
@@ -146,24 +172,16 @@ ggplot(disease_by_age, aes(x = age_group, y = target)) +
     geom_bar(stat = "identity", fill = "blue") +
     labs(title = "Enfermedades por edad", x = "Edad", y = "Enfermedades")
 
-ggplot(strokes_by_age, aes(x = age_group, y = target)) +
+ggplot(disease_by_glucose, aes(x = avg_glucose_status, y = target)) +
     geom_bar(stat = "identity", fill = "blue") +
-    labs(title = "Strokes by Age", x = "Age", y = "Strokes")
+    labs(
+        title = "Enfermedades por diabetes",
+        x = "Diabetes", y = "Enfermedades"
+    )
 
-ggplot(bmi_by_age, aes(x = bmi_group, y = target)) +
+ggplot(disease_by_hypetension, aes(x = hypertension, y = target)) +
     geom_bar(stat = "identity", fill = "blue") +
-    labs(title = "Strokes by bmi", x = "Age", y = "Strokes")
-
-ggplot(strokes_by_smoke, aes(x = smoking_status, y = target)) +
-    geom_bar(stat = "identity", fill = "blue") +
-    labs(title = "Strokes by smoke", x = "Age", y = "Strokes")
-
-# grafico de bmi x enfermedades
-ggplot(disease_by_bmi, aes(x = bmi_status, y = target)) +
-    geom_bar(stat = "identity", fill = "blue") +
-    labs(title = "bmi by disease", x = "bmi", y = "disease")
-
-# strokes_by_gender <- health %>%
-#     filter(health$hypertension == 1) %>%
-#     group_by(health$gender) %>%
-#     summarise(target = sum(stroke))
+    labs(
+        title = "Enfermedades por hipertensión",
+        x = "Hipertensión", y = "Enfermedades"
+    )
